@@ -15,7 +15,7 @@ public class CallCenterExample {
     volatile boolean stopThreads = false;
 
     public CallCenterExample() {
-        drop = new ArrayBlockingQueue<String>(1, true);
+        drop = new ArrayBlockingQueue<String>(NUMBER_OF_SPECIALIST, true);
         (new Thread(new Calls())).start();
         ThreadGroup specialistsGroup = new ThreadGroup("Specialists");
         for (int i = 1; i <= NUMBER_OF_SPECIALIST; i++)
@@ -41,18 +41,14 @@ public class CallCenterExample {
         public void run() {
             String call = null;
             try {
-               // Так и не понял почему подвисают потоки специалистов. По-возможности подскажите где упущение.
-               // условие while (true && !stopThreads) должно закрывать их (выходим из run) при достижении лимита звонков
-                while (true && !stopThreads) {
-                    if (drop.peek() != null) {
+                 while (true && !stopThreads) {
                         call = drop.take();
-                        if (call == DONE) {
+                        if (call ==  DONE) {
                             stopThreads = true;
                             break;
                         }
                         System.out.println("Специалист (" + Thread.currentThread().getName() + ") ответил на " + call);
                         Thread.sleep(RESPONSE_TIME);
-                    }//else Thread.yield();
                 }
             } catch (InterruptedException e) {
                 System.err.println(e.getMessage());
